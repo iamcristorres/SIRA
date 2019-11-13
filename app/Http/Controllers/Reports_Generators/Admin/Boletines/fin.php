@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Anouar\Fpdf\Fpdf as baseFpdf;
 use App\institucion;
 use App\curso;
+use App\grado;
 use App\estudiante;
 use App\area;
 use App\asignatura;
@@ -200,8 +201,6 @@ class PDF extends baseFpdf{
 
 class fin extends PDF
 {
-	
-
 	public function exportpdf($curso_id) {
    	$institucion=institucion::first();
    	$h=historial_periodo::where('periodo_anual',$institucion->ANO_ACTIVO)->first();
@@ -458,11 +457,13 @@ class fin extends PDF
  		}
  		
  	}
+ 	$cursoquery=curso::where('id',$curso_id)->first();
+ 	$grado_siguiente=grado::where('id','=',$cursoquery->id_grado)->first();
  	$text="";
  	if($total_areas_na>1){
- 		$text="AÑO LECTIVO $institucion->ANO_ACTIVO NO APROBADO. NO PROMOVIDO AL GRADO SIGUIENTE";
+ 		$text="AÑO LECTIVO $institucion->ANO_ACTIVO NO APROBADO. NO PROMOVIDO AL GRADO $grado_siguiente->GRADO_SIGUIENTE";
  	}else{
- 		$text="¡FELICITACIONES! AÑO LECTIVO $institucion->ANO_ACTIVO APROBADO. PROMOVIDO AL GRADO SIGUIENTE";
+ 		$text="¡FELICITACIONES! AÑO LECTIVO $institucion->ANO_ACTIVO APROBADO. PROMOVIDO AL GRADO $grado_siguiente->GRADO_SIGUIENTE";
  	}
 
  	$pdf::SetFont('Arial','b',8);
