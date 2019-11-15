@@ -8,8 +8,19 @@
 
 <?php
 use App\asignatura;
+use App\calificacion;
 use App\curso;
+use App\historial_periodo;
 $actualdate=date("Y-m-d");
+
+function truncateFloat($number, $digitos)
+  {
+    $raiz = 10;
+    $multiplicador = pow ($raiz,$digitos);
+    $resultado = ((int)($number * $multiplicador)) / $multiplicador;
+    return number_format($resultado, $digitos);
+  }
+
 ?>
 <div class="d-flex align-items-center p-5 text-white-50 bg-purple rounded box-shadow">
         <img class="mr-3" src="{{ url('/logo/'.$institucion->LOGO) }}" alt="" width="48" height="48">
@@ -50,12 +61,40 @@ $actualdate=date("Y-m-d");
       $curso=curso::where('CURSO','=',$estudiante->CURSO)->first();
       $curso_id=$curso->id;
       $asignaturasc=asignatura::where('id_area','=',$area->id)->where('id_curso','=',$curso_id)->where('ANO','=',$institucion->ANO_ACTIVO)->count();
+
+
+      $areasquery=asignatura::where('id_area','=',$area->id)->where('id_curso','=',$curso_id)->where('ANO','=',$institucion->ANO_ACTIVO)->get();
+      $definitiva_area=0;
+      $cont=0;
+
+      foreach ($areasquery as $asignaturaconsult) {
+      $consulta_notas=calificacion::where('id_asignatura','=',$asignaturaconsult->id)->where('CODIGO_ESTUDIANTE','=',$estudiante->CODIGO)->where('ANO_ACT','=',$institucion->ANO_ACTIVO)->first();
+      $def=($consulta_notas->P1+$consulta_notas->P2+$consulta_notas->P3+$consulta_notas->P4)/4;
+      $definitiva_area+=$def;
+      $cont++;
+      }
+
+      if($cont==0){
+       $cont=1; 
+      }
+      $definitiva_area_total=truncateFloat($definitiva_area/$cont,2);
+      $h=historial_periodo::where('periodo_anual','=',$institucion->ANO_ACTIVO)->first();
       ?>
+
       @if($asignaturasc>0)
 
       <tr role="row" class="even">
       <td colspan="5" style="background-color:#052F5F; color:#fff;font-weight: bold;">{{$area->NOMBRE_AREA}}</td>
-      <td></td>
+
+      @if($definitiva_area_total<$h->nota_min_a)
+      <td style="background-color:#C62300; color:#fff;font-weight: bold;">
+        <center>{{$definitiva_area_total}}</center> 
+      </td>
+      @else
+      <td>
+        <center>{{$definitiva_area_total}}</center> 
+      </td>
+      @endif
       </tr>
       
       @foreach($asignaturas as $asignatura)
@@ -69,7 +108,7 @@ $actualdate=date("Y-m-d");
       <td class="sorting_1"><center>{{$calificacion->P2}}</center></td>
       <td class="sorting_1"><center>{{$calificacion->P3}}</center></td>
       <td class="sorting_1"><center>{{$calificacion->P4}}</center></td>
-      <td class="sorting_1"></td>
+      <td class="sorting_1"><center>{{truncateFloat(($calificacion->P1+$calificacion->P2+$calificacion->P3+$calificacion->P4)/4,1)}}</center></td>
       </tr>
       @endif
       @endforeach
