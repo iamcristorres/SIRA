@@ -74,7 +74,7 @@ use App\calificacion;
 			<tr role="row" class="even">
 			<td class="sorting_1">{{$i.'.'}}</td>
 			<td class="sorting_1"><input hidden value='{{$estudiante->CODIGO}}' name="dni[]" > {{$estudiante->APELLIDO1.' '.$estudiante->APELLIDO2.' '.$estudiante->NOMBRES}}</td>
-			<td class="sorting_1"><input class="form-control" type="number" value="{{$f1}}" id="example-number-input" name="f1[]" ></td>
+			<td class="sorting_1"><input class="form-control" type="number" value="{{$f1}}" id="example-number-input" name="f1[]"></td>
 			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p1}}"  id="example-number-input1"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p1[]" ></td></td>
 			<td class="sorting_1"><input class="form-control" type="number" value="{{$f2}}" id="example-number-input"  name="f2[]" ></td></td>
 			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p2}}"  id="example-number-input2"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p2[]" ></td></td>
