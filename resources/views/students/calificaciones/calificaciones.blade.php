@@ -119,7 +119,7 @@ $actualdate=date("Y-m-d");
               @endif
 
               @if($actualdate>=$portal->EP_PER4)
-              <td style="color:#6C6C6C"><center>DISPONIBLE</center></td>
+              <td style="color:#6C6C6C"><center><a href="{{url('/p4e/'.$estudiante->CODIGO)}}">DISPONIBLE</a></center></td>
               @else
               <td style="color:#6C6C6C"><center>NO DISPONIBLE</center></td>
               @endif

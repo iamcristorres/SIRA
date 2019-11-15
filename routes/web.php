@@ -98,7 +98,7 @@ Route::get('/logoute/{cod?}','Student_login@logout');
 
 
 Route::get('/p3e/{estudiante_cod}', 'Reports_Generators\Students\Boletines\p3@exportpdf');
-
+Route::get('/p4e/{estudiante_cod}', 'Reports_Generators\Students\Boletines\p4@exportpdf');
 });
 
 
