@@ -80,8 +80,8 @@ use App\calificacion;
 			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p2}}"  id="example-number-input2"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p2[]" readonly></td></td>
 			<td class="sorting_1"><input class="form-control" type="number" value="{{$f3}}" id="example-number-input"  name="f3[]" readonly ></td></td>
 			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p3}}" id="example-number-input3"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p3[]" readonl></td></td>
-			<td class="sorting_1"><input class="form-control" type="number" value="{{$f4}}" id="example-number-input"  name="f4[]"></td></td>
-			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p4}}" id="example-number-input4"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p4[]"></td></td>
+			<td class="sorting_1"><input class="form-control" type="number" value="{{$f4}}" id="example-number-input"  name="f4[]" readonly></td></td>
+			<td class="sorting_1"><input class="form-control definitivaperiodo" type="number" value="{{$p4}}" id="example-number-input4"  max='{{$periodo_anual->nota_max}}' min='{{$periodo_anual->nota_min}}' step='any' name="p4[]" readonly></td></td>
 			</tr>
 			
 			<?php $i++; ?>
