@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Anouar\Fpdf\Fpdf as baseFpdf;
 use App\institucion;
 use App\curso;
+use App\grado;
 use App\estudiante;
 use App\area;
 use App\asignatura;
@@ -243,6 +244,7 @@ class p4 extends PDF
 	$pdf::AliasNbPages();
 	$promedio=0;
 	$asignaturascount=0;
+	$total_areas_na=0;
  	foreach($areas as $area){
  		$asignaturasc=asignatura::where('id_area',$area->id)->where('id_curso',$curso_id)->count();
  		if($asignaturasc>0){
@@ -252,6 +254,7 @@ class p4 extends PDF
  		$pdf::cell(334,6,utf8_decode("ÁREA:: $area->NOMBRE_AREA"),1,"","L",1);
  		$pdf::SetFont('Arial','',7);
  		$pdf::Ln();
+ 		$def_area=0;
  		$asignaturas=asignatura::where('id_area',$area->id)->where('id_curso',$curso_id)->get();
  			foreach($asignaturas as $asignatura){
  				$pdf::SetFillColor(255,255,255);
@@ -315,6 +318,7 @@ class p4 extends PDF
  				}
 
  				$defc=($periodo1+$periodo2+$periodo3+$periodo4)/4;
+ 				$def_area+=$defc;
  				$definitivad=$pdf::truncateFloat($defc, 2);
  				$posy=$pdf::GetY();
  				$pdf::SetX(10);
@@ -378,15 +382,57 @@ class p4 extends PDF
 				
 				
  			}
+
+ 			$def_area1=$def_area/$asignaturasc;
+ 			$definitiva_area=$pdf::truncateFloat($def_area1, 2);
+ 			if($definitiva_area<$h->nota_min_a){
+ 				$total_areas_na++;
+ 			}
+
  		}
  		
  	}
  	
  	$pdf::SetFont('Arial','b',9);
  	$pdf::Cell(334, 6,utf8_decode("ESCALA VALORATIVA: Desempeño Superior [$h->su_min - $h->su_max]   Desempeño Alto [$h->al_min - $h->al_max]   Desempeño Básico [$h->bs_min - $h->bs_max]  Desempeño Bajo [$h->bj_min - $h->bj_max]"), 1, 1, 'C', true);
- 	$pdf::Cell(334, 5,utf8_decode("OBSERVACIONES"), 1, 1, 'J', true);
- 	$pdf::Cell(334, 5,utf8_decode(""), 1, 1, 'C', true);
- 	$pdf::Cell(334, 5,utf8_decode(""), 1, 1, 'C', true);
+ 	$valordey=$pdf::GetY();
+ 	$cursoquery=curso::where('id',$curso_id)->first();
+ 	$grado_siguiente=grado::where('id','=',$cursoquery->id_grado)->first();
+	$observacionf2="";
+	$observacionf3="";
+ 	if($total_areas_na>=1){
+ 		$pdf::SetFillColor(178,6,24);
+ 		$observacionf2="NO APROBADO";
+ 	}else{
+ 		$pdf::SetFillColor(3,129,26);
+ 		$observacionf2="APROBADO";
+ 		$observacionf3="$grado_siguiente->GRADO_SIGUIENTE";
+ 	}
+ 	
+
+ 	$pdf::SetTextColor(255,255,255);
+ 	$pdf::MultiCell(50, 15,utf8_decode(""), 1,'C', 1);
+ 	
+ 	$pdf::SetY($valordey+5);
+	
+ 	$pdf::SetFillColor(255,255,255);
+ 	$pdf::SetY($valordey+10);
+
+ 	$pdf::SetY($valordey);
+ 	$pdf::SetX(10);
+ 	$pdf::Cell(50, 5,utf8_decode("ESTADO FINAL AÑO:: $institucion->ANO_ACTIVO"), 0, 0, 'J', 0);
+ 	$pdf::SetY($valordey+5);
+ 	$pdf::Cell(50, 5,utf8_decode("$observacionf2"), 0, 0, 'C', 0);
+ 	$pdf::SetY($valordey+10);
+
+ 	$pdf::SetY($valordey);
+ 	$pdf::SetX(60);
+ 	$pdf::SetTextColor(0,0,0);
+ 	$pdf::Cell(284, 5,utf8_decode("OBSERVACIONES"), 1, 1, 'J', true);
+ 	$pdf::SetX(60);
+ 	$pdf::Cell(284, 5,utf8_decode(""), 1, 1, 'C', true);
+ 	$pdf::SetX(60);
+ 	$pdf::Cell(284, 5,utf8_decode(""), 1, 1, 'C', true);
  	$pdf::Cell(334, 5,utf8_decode(""), 1, 1, 'C', true);
  	$pdf::Cell(334, 5,utf8_decode(""), 1, 1, 'C', true);
  	$pdf::Ln();

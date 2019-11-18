@@ -460,7 +460,7 @@ class fin extends PDF
  	$cursoquery=curso::where('id',$curso_id)->first();
  	$grado_siguiente=grado::where('id','=',$cursoquery->id_grado)->first();
  	$text="";
- 	if($total_areas_na>1){
+ 	if($total_areas_na>=1){
  		$text="AÑO LECTIVO $institucion->ANO_ACTIVO NO APROBADO. NO PROMOVIDO AL GRADO $grado_siguiente->GRADO_SIGUIENTE";
  	}else{
  		$text="¡FELICITACIONES! AÑO LECTIVO $institucion->ANO_ACTIVO APROBADO. PROMOVIDO AL GRADO $grado_siguiente->GRADO_SIGUIENTE";
