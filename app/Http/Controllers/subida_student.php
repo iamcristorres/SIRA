@@ -175,7 +175,7 @@ class subida_student extends Controller
         $fecha_actual = date("Y-m-d");
         $referencia=$codigo_estudiante."".$ano_act."".date("zdmGis");
 
-        $busquedasimilaresi=gen_cert::where('CODIGO_eS','=',$codigo_estudiante)->where('TIPO_CERT','=',$tipo_certificado)->where('ANO','=',$ano_sol)->count();
+        $busquedasimilaresi=gen_cert::where('CODIGO_ES','=',$codigo_estudiante)->where('TIPO_CERT','=',$tipo_certificado)->where('ANO','=',$ano_sol)->where('FECHA_FIN','>',$fecha_actual)->count();
         
         if($busquedasimilaresi==0){
             
