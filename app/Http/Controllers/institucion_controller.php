@@ -19,6 +19,7 @@ use App\asignatura;
 use App\area;
 use App\historicoAreas;
 use App\historicoAsignatura;
+use App\historialCalificacion;
 class institucion_controller extends Controller
 {
     function getDatos_Tu_Institucion(){
@@ -327,6 +328,13 @@ class institucion_controller extends Controller
             );
     }
 
+    public function truncateFloat($number, $digitos)
+    {
+    $raiz = 10;
+    $multiplicador = pow ($raiz,$digitos);
+    $resultado = ((int)($number * $multiplicador)) / $multiplicador;
+    return number_format($resultado, $digitos);
+    }
 
     public function cierrePeriodoAnual(){
         $institucion=institucion::find(1);
@@ -354,15 +362,28 @@ class institucion_controller extends Controller
                 $historicoAsignatura->save();
             }
 
-            $estudiantes=estudiante::where('ESTADO_DEL_ESTUDIANTE','=',$periodo)->get();
+            $estudiantes=estudiante::where('ESTADO_DEL_ESTUDIANTE','=','ACTIVO')->get();
 
             foreach ($estudiantes as $estudiante) {
-                
+                $calificaciones=calificacion::where('CODIGO_ESTUDIANTE','=',$estudiante->CODIGO)->where('ANO_ACT','=',$periodo)->get();
+                foreach ($calificaciones as $calificacion) {
+                    $def=($calificacion->P1+$calificacion->P2+$calificacion->P3+$calificacion->P4)/4;
+                    $definitiva=truncateFloat($def,1);
+                    $fallas=$calificacion->F1+$calificacion->F2+$calificacion->F3+$calificacion->F4;
+                    $cal=new historialCalificacion();
+                    $cal->CODIGO_ESTUDIANTE=$calificacion->CODIGO_ESTUDIANTE;
+                    $cal->ID_ASIGNATURA=$calificacion->id_asignatura;
+                    $cal->PERIODO=$calificacion->ANO_ACT;
+                    $cal->DEF=$definitiva;
+                    $cal->TF=$fallas; 
+                    $cal->save();   
+                }
             }
-
-            $calificaciones=calificacion::where('ANO_ACT','=',$periodo)->get();
-
+      
         }
     }
+
+
+
 
 }
