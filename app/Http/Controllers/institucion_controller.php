@@ -8,12 +8,17 @@ use App\historial_periodo;
 use App\Http\Controllers\Response;
 use App\curso;
 use App\docente;
+use App\estudiante;
 use App\grado;
 use App\coddiagnostico;
 use App\diagnostico;
 use App\portal;
 use App\municipio;
-
+use App\calificacion;
+use App\asignatura;
+use App\area;
+use App\historicoAreas;
+use App\historicoAsignatura;
 class institucion_controller extends Controller
 {
     function getDatos_Tu_Institucion(){
@@ -320,6 +325,44 @@ class institucion_controller extends Controller
         return response()->json(
             $municipios->toArray()  
             );
+    }
+
+
+    public function cierrePeriodoAnual(){
+        $institucion=institucion::find(1);
+        $periodo=$institucion->ANO_ACTIVO;
+        if($institucion->ACTIVO==1){
+
+            $areas=area::where('ANO','=',$periodo)->get();
+            $asignaturas=asignatura::where('ANO','=',$periodo)->get();
+
+            foreach ($areas as $area) {
+                $historicoArea=new historicoArea();
+                $historicoArea->AREA=$area->NOMBRE_AREA;
+                $historicoArea->PERIODO=$area->ANO;
+                $historicoArea->save();
+            }
+
+            foreach($asignaturas as $asignatura){
+                $historicoAsignatura=new historicoAsignatura();
+                $historicoAsignatura->ID_AREA=$asignatura->id_area;
+                $historicoAsignatura->NOMBRE_ASIGNATURA=$asignatura->NOMBRE_ASIGNATURA;
+                $historicoAsignatura->ID_GRADO=$asignatura->id_grado;
+                $historicoAsignatura->ID_CURSO=$asignatura->id_curso;
+                $historicoAsignatura->IHS=$asignatura->IHS;
+                $historicoAsignatura->PERIODO=$asignatura->ANO;
+                $historicoAsignatura->save();
+            }
+
+            $estudiantes=estudiante::where('ESTADO_DEL_ESTUDIANTE','=',$periodo)->get();
+
+            foreach ($estudiantes as $estudiante) {
+                
+            }
+
+            $calificaciones=calificacion::where('ANO_ACT','=',$periodo)->get();
+
+        }
     }
 
 }
