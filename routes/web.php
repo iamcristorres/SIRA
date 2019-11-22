@@ -375,6 +375,11 @@ Route::get('/create_califications_estudiantes/{id}',array(
 	'as'=>'CreateCalificationEstudianteADm',
 	'uses'=>'academic_creator_controller@create_space_califications'
 ));
+
+
+//CIERRE DE PERIODO ANUAL
+
+Route::get('/close','institucion_controller@cierrePeriodoAnual');
 //DOCUMENTS
 
 Route::get('/exportpdf/{curso_id}', 'boletin_prueba@exportpdf');
