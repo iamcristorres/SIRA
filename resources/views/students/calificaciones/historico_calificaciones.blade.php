@@ -42,7 +42,12 @@ $actualdate=date("Y-m-d");
     <center>
       <label for="codigo">Periodo:</label>
                <select class="form-control" id="codigo" name="codigo">
+               @if($acayears->count()==0)
                <option value="">Seleccione</option>
+               @endif
+               @foreach($acayears as $years)
+               <option value="{{$years->PERIODO}}">{{$years->PERIODO}}</option>
+               @endforeach
                </select>
     </center>
   </div>

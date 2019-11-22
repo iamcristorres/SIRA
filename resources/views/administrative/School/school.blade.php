@@ -46,6 +46,16 @@
 @include("administrative.School.Modal.basic_information")
 @include("administrative.School.Modal.academic_config")
 @include("administrative.School.Modal.portals_configuration")
+
+<div class="bgothers_red my-3 p-3 rounded box-shadow">
+	        <br>
+	        <div class="row">
+	        <div class="col-md-4"></div>
+	        <div class="col-md-4"><center><a href="{{url('/close')}}" class="btn btn-primary"><span class="glyphicon glyphicon-list-alt"></span> Cerrar Año Lectivo</a></center></div>
+	        <div class="col-md-4"></div>
+	       </div>
+</div>
+
 @else
 
 <div class="row my-3">
@@ -65,20 +75,6 @@
 
 @endif
 
-
-
-
-
-
-
-<div class="bgothers_red my-3 p-3 rounded box-shadow">
-	        <br>
-	        <div class="row">
-	        <div class="col-md-4"><center><a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-list-alt"></span> Información Básica</a></center></div>
-	        <div class="col-md-4"><center><a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-list-alt"></span> Configuración Académica</a></center></div>
-	        <div class="col-md-4"><center><a href="#" class="btn btn-primary"><span class="glyphicon glyphicon-list-alt"></span> Configuración de Portales</a></center></div>
-	       </div>
-</div>
 
 
 

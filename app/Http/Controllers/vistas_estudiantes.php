@@ -20,6 +20,7 @@ use App\pagosonline;
 use App\orden;
 use App\departamento;
 use App\eps;
+use App\historialCalificacion;
 use App\visualizador_diagnostico;
 use Illuminate\Support\Facades\View;
 class vistas_estudiantes extends Controller
@@ -95,11 +96,12 @@ class vistas_estudiantes extends Controller
         $institucion=institucion::first();
         $ano_act=$institucion->ANO_ACTIVO;
         $estudiante=estudiante::find(auth('student')->user()->CODIGO);
+        $anosaca=historialCalificacion::where('CODIGO_ESTUDIANTE','=',auth('student')->user()->CODIGO)->distinct('PERIODO')->get('PERIODO');
         $infopago=pagosonline::first();
         $fecha_actual = date("Y-m-d");
         $certificados=gen_cert::where('CODIGO_ES','=',auth('student')->user()->CODIGO)->where('MAX_PAGO','>=',$fecha_actual)->get();
         $certcount=$certificados->count();
-        return View::make('students.solicitud_cert.solicitud_certificados')->with('institucion', $institucion)->with('estudiante',$estudiante)->with('ano_act',$ano_act)->with('certificados',$certificados)->with('solicitudes',$certcount)->with('infopago',$infopago);
+        return View::make('students.solicitud_cert.solicitud_certificados')->with('institucion', $institucion)->with('estudiante',$estudiante)->with('ano_act',$ano_act)->with('certificados',$certificados)->with('solicitudes',$certcount)->with('infopago',$infopago)->with('acayears',$anosaca);
     }
 
     public function perfil(){
@@ -115,6 +117,7 @@ class vistas_estudiantes extends Controller
         $institucion=institucion::first();
          $ano_act=$institucion->ANO_ACTIVO;
         $estudiante=estudiante::find(auth('student')->user()->CODIGO);
-        return View::make('students.calificaciones.historico_calificaciones')->with('institucion', $institucion)->with('estudiante',$estudiante);
+        $anosaca=historialCalificacion::where('CODIGO_ESTUDIANTE','=',auth('student')->user()->CODIGO)->distinct('PERIODO')->get('PERIODO');
+        return View::make('students.calificaciones.historico_calificaciones')->with('institucion', $institucion)->with('estudiante',$estudiante)->with('acayears',$anosaca);;
     }
 }

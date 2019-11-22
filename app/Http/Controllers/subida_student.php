@@ -12,6 +12,7 @@ use App\verificacion;
 use App\gen_cert;
 use App\cost_certificates;
 use App\contabilidad;
+use App\historialCalificacion;
 use App\cpagos;
 use Mail;
 class subida_student extends Controller
@@ -306,6 +307,15 @@ class subida_student extends Controller
 
 
     }
+
+
+    public function retornaanoacademico($id){
+        $anos=historialCalificacion::where('CODIGO_ESTUDIANTE','=',$id)->distinct('PERIODO')->get('PERIODO');
+        return response()->json(
+            $anos->toArray()  
+            );
+    }   
+
 
     public function uppersonalinfo(Request $request){
          $codigo_estudiante=auth('student')->user()->CODIGO;

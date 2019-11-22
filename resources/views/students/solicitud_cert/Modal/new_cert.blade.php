@@ -15,15 +15,22 @@
             <div class="col-md-8">
                <label for="ticert">Tipo de Certificado</label>
                <select class="form-control" id="ticert" name="ticert">
+               @if($institucion->ACTIVO!=0)
                <option value="1">Constancia de estudio año {{$ano_act}}</option>
+               @endif
                <option value="2">Constancia de Notas</option>
+               @if($institucion->ACTIVO!=0)
                <option value="3">Constancia Financiera año {{$ano_act}}</option>
+               @endif
                </select>
             </div>
 
             <div class="col-md-3" id="ano_space" style="display:none;">
                <label for="ano">año</label>
                <select class="form-control" id="ano_cert" name="ano_cert">
+                @foreach($acayears as $years)
+                  <option value="{{$years->PERIODO}}">{{$years->PERIODO}}</option>
+                @endforeach
                </select>
             </div>
         </div>

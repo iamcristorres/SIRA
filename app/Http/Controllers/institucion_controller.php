@@ -345,7 +345,7 @@ class institucion_controller extends Controller
             $asignaturas=asignatura::where('ANO','=',$periodo)->get();
 
             foreach ($areas as $area) {
-                $historicoArea=new historicoArea();
+                $historicoArea=new historicoAreas();
                 $historicoArea->AREA=$area->NOMBRE_AREA;
                 $historicoArea->PERIODO=$area->ANO;
                 $historicoArea->save();
@@ -368,7 +368,7 @@ class institucion_controller extends Controller
                 $calificaciones=calificacion::where('CODIGO_ESTUDIANTE','=',$estudiante->CODIGO)->where('ANO_ACT','=',$periodo)->get();
                 foreach ($calificaciones as $calificacion) {
                     $def=($calificacion->P1+$calificacion->P2+$calificacion->P3+$calificacion->P4)/4;
-                    $definitiva=truncateFloat($def,1);
+                    $definitiva=$this->truncateFloat($def,1);
                     $fallas=$calificacion->F1+$calificacion->F2+$calificacion->F3+$calificacion->F4;
                     $cal=new historialCalificacion();
                     $cal->CODIGO_ESTUDIANTE=$calificacion->CODIGO_ESTUDIANTE;
@@ -379,6 +379,14 @@ class institucion_controller extends Controller
                     $cal->save();   
                 }
             }
+
+
+            $institucion->ACTIVO=0;
+            $institucion->save();
+
+            return redirect('/school')->with(array(
+            'message'=>'Operación Realizada con exito.'
+            ));
       
         }
     }
