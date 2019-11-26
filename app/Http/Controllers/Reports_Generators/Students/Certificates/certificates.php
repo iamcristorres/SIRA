@@ -10,6 +10,12 @@ use App\grado;
 use App\estudiante;
 use App\gen_cert;
 use App\asignatura;
+
+use App\estado_final_anual;
+use App\historial_periodo;
+use App\historialCalificacion;
+use App\historicoAreas;
+use App\historicoAsignatura;
 $nombre_estudiante="";
 class PDF extends baseFpdf{
 
@@ -390,6 +396,135 @@ class PDF extends baseFpdf{
         $this->Ln();
         $this->cell(165,6,utf8_decode("Nro. de Confirmación: $cod_certifi"),0,"","R");
     }
+
+    public function truncateFloat($number, $digitos)
+    {
+    $raiz = 10;
+    $multiplicador = pow ($raiz,$digitos);
+    $resultado = ((int)($number * $multiplicador)) / $multiplicador;
+    return number_format($resultado, $digitos);
+    }
+
+
+
+        function academico(){
+        global $estudiante_codigo;
+        global $cod_certifi;
+        global $ano_cert;
+        global $fecha_expedicion;
+
+        $institucion=institucion::first();
+        $ciudad=$institucion->CIUDAD;
+        $per1=$institucion->DIRECTOR_A;
+        $cargo1=$institucion->CARGO_D;
+        $per2=$institucion->SECRETARIO_A;
+        $cargo2=$institucion->CARGO_A;
+        $firma_persona1=url('/logo/'.$institucion->FIRMA1);
+        $firma_persona2=url('/logo/'.$institucion->FIRMA2);
+        $sello1=url('/logo/'.$institucion->SELLO_RECT);
+        $sello2=url('/logo/'.$institucion->SELLO_2);
+        $this->Ln();
+        $this->SetTextColor(0,0,0);
+        $this->Ln();
+        $this->SetFont('Arial','B',12);
+        $this->cell(165,6,utf8_decode("CERTIFICADO FINAL"),0,"","C");
+        $this->Ln();
+        $this->Ln();
+        $this->SetFont('Arial','B',12);
+        $estudiante=estudiante::find($estudiante_codigo);
+        $nombre_estudiante=mb_strtoupper($estudiante->NOMBRES." ".$estudiante->APELLIDO1." ".$estudiante->APELLIDO2, 'UTF-8');
+        $numero_de_documento=number_format($estudiante->NUMERO_DE_DOCUMENTO, 0, '', '.');
+        
+        $curso=$estudiante->CURSO;
+        $tidocumento=mb_strtoupper($estudiante->TIPO_DE_DOCUMENTO, 'UTF-8');
+        $cursoinfo=curso::where('CURSO','=',$curso)->first();
+        $id_curso=$cursoinfo->id;
+        $asignaturas=asignatura::where('id_curso','=',$id_curso)->get()->sum('IHS');
+        $jornada=$cursoinfo->JORNADA;
+        $horario=$cursoinfo->HORARIO;
+        $genero=$estudiante->GENERO;
+        $date = date_create($fecha_expedicion);
+        $dia=date_format($date, 'j');
+        $mes=date_format($date, 'n');
+        $ano=date_format($date, 'Y');
+        $fechaletter=$this->fechareturn($dia,$mes,$ano);
+        $i1="El";
+        $i2="identificado";
+        $i3="MATRICULADO";
+        if($genero=="FEMENINO"){
+            $i1="La";
+            $i2="identificada";
+            $i3="MATRICULADA";
+        }
+
+        $estado=estado_final_anual::where('CODIGO','=',$estudiante_codigo)->where('PERIODO','=',$ano_cert)->first();
+        $educacion=grado::where('GRADO','=',$estado->GRADO)->first();
+        $educaciontype=$educacion->EDUCACION;
+        if($estado->ESTADO=="APROBADO"){
+            $estado_final="APROBÓ";
+        }else{
+            $estado_final="NO APROBÓ";
+        }
+        $this->SetFont('Arial','',9);
+        $this->Multicell(165,6,utf8_decode("$i1 Estudiante $nombre_estudiante $i2 con $tidocumento número $numero_de_documento CURSÓ Y $estado_final en el año lectivo $ano_cert su estudios correspondientes al grado $estado->GRADO de $educaciontype en este establecimiento educativo, cuyas valoraciones e intensidad horaria se relaciona a continuación:"),0,"J");
+        $this->Ln();
+        $areas=historicoAreas::where('PERIODO','=',$ano_cert)->orderBy('AREA', 'ASC')->get();
+        $this->SetFillColor(131,140,251);
+        $this->SetFont('Arial','',7);
+        $this->cell(102,4,utf8_decode("ÁREAS / ASIGNATURAS"),1,"","C",1);
+        $this->cell(8,4,utf8_decode("IH-S"),1,"","C",1);
+        $this->cell(20,4,utf8_decode("DEFINITIVA"),1,"","C",1);
+        $this->cell(35,4,utf8_decode("ESCALA NACIONAL"),1,"","C",1);
+        $this->Ln();
+        foreach($areas as $area){
+            $def_area=0;
+            $asignaturasc=historicoAsignatura::where('ID_AREA','=',$area->ID_AREA)->where('ID_CURSO','=',$estado->COD_CURSO)->count();
+            if($asignaturasc>0){
+                $this->SetFillColor(87,180,252);
+                $this->SetFont('Arial','b',7);       
+                $this->cell(110,4,utf8_decode("ÁREA:: $area->AREA"),1,"","L",1);
+                $this->cell(20,4,utf8_decode(""),1,"","L",1);
+                $this->cell(35,4,utf8_decode(""),1,"","L",1);
+                $this->Ln();
+                $asignaturas=historicoAsignatura::where('ID_AREA','=',$area->ID_AREA)->where('ID_CURSO','=',$estado->COD_CURSO)->get();
+                foreach($asignaturas as $asignatura){
+                    $calificacion=historialCalificacion::where('CODIGO_ESTUDIANTE',$estudiante_codigo)->where('PERIODO',$ano_cert)->where('ID_ASIGNATURA',$asignatura->ID_ASIGNATURA)->first();
+                    $def_area+=$calificacion->DEF;
+                }
+                $def_area=$def_area/$asignaturasc;
+                
+            }
+        }
+
+
+
+
+        $this->Multicell(165,6,utf8_decode("Esta constancia se expide a solicitud del interesado via web en la ciudad de $ciudad $fechaletter"),0,"J");
+        $this->Ln();
+        $this->Multicell(165,6,utf8_decode("Cordialmente,"),0,"J");
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->SetX(23);
+        $posicionvert=$this->GetY()-27;
+        $this->Image("$firma_persona1",18,$posicionvert,55,35);
+        $this->Image("$sello1",60,$posicionvert+4,40,40);
+        $this->Image("$firma_persona2",120,$posicionvert,55,35);
+        $this->Image("$sello2",155,$posicionvert+4,40,40);
+        $this->Cell(100,6,utf8_decode("$per1"),0,"","L");
+        $this->Cell(100,6,utf8_decode("$per2"),0,"","L");
+        $this->Ln();
+        $this->Cell(100,6,utf8_decode("$cargo1"),0,"","L");
+        $this->Cell(100,6,utf8_decode("$cargo2"),0,"","L");
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->Ln();
+        $this->cell(165,6,utf8_decode("Nro. de Confirmación: $cod_certifi"),0,"","R");
+    }
 }
 
 class certificates extends PDF
@@ -421,6 +556,10 @@ class certificates extends PDF
  	if($cert==1){
  		$pdf::estudios();
  	}
+
+    if($cert==2){
+        $pdf::academico();
+    }
  	
  	$pdf::Output();
 	}

@@ -20,6 +20,8 @@ use App\area;
 use App\historicoAreas;
 use App\historicoAsignatura;
 use App\historialCalificacion;
+use App\estado_final_anual;
+use App\historial_cursos;
 class institucion_controller extends Controller
 {
     function getDatos_Tu_Institucion(){
@@ -339,16 +341,27 @@ class institucion_controller extends Controller
     public function cierrePeriodoAnual(){
         $institucion=institucion::find(1);
         $periodo=$institucion->ANO_ACTIVO;
+        $h=historial_periodo::where('periodo_anual',$institucion->ANO_ACTIVO)->first();
         if($institucion->ACTIVO==1){
 
             $areas=area::where('ANO','=',$periodo)->get();
             $asignaturas=asignatura::where('ANO','=',$periodo)->get();
-
+            $cursos=curso::where('PERIODO','=',$periodo)->get();
             foreach ($areas as $area) {
                 $historicoArea=new historicoAreas();
+                $historicoArea->ID_AREA=$area->id;
                 $historicoArea->AREA=$area->NOMBRE_AREA;
                 $historicoArea->PERIODO=$area->ANO;
                 $historicoArea->save();
+            }
+
+            foreach ($cursos as $curso) {
+                $historicoCursos=new historial_cursos();
+                $historicoCursos->ID_CURSO=$curso->id;
+                $historicoCursos->ID_GRADO=$curso->id_grado;
+                $historicoCursos->PERIODO=$curso->PERIODO;
+                $historicoCursos->CURSO=$curso->CURSO;
+                $historicoCursos->save();
             }
 
             foreach($asignaturas as $asignatura){
@@ -378,7 +391,89 @@ class institucion_controller extends Controller
                     $cal->TF=$fallas; 
                     $cal->save();   
                 }
+
+                $curso=curso::where('CURSO',$estudiante->CURSO)->first();
+                $curso_id=$curso->id;
+                //CONSULTA ANO APROBADO O NO
+                $total_areas_na=0;
+                foreach ($areas as $area) {
+                   
+                   $asignaturasc=asignatura::where('id_area',$area->id)->where('id_curso',$curso_id)->count();
+                   if($asignaturasc>0){
+                        $def_area=0;
+                        $asignaturass=asignatura::where('id_area',$area->id)->where('id_curso',$curso_id)->get();
+                        foreach($asignaturass as $asignaturau){
+                            $calificacion=calificacion::where('CODIGO_ESTUDIANTE',$estudiante->CODIGO)->where('ANO_ACT',$institucion->ANO_ACTIVO)->where('id_asignatura',$asignaturau->id)->first();
+                            $periodo1=$h->nota_min;
+                 $fallasp1=0;
+                 $periodo2=$h->nota_min;
+                 $fallasp2=0;
+                 $periodo3=$h->nota_min;
+                 $fallasp3=0;
+                 $periodo4=$h->nota_min;
+                 $fallasp4=0;
+                if(isset($calificacion->P1)){
+                 $periodo1=$calificacion->P1;
+                }
+                if(isset($calificacion->F1)){
+                 $fallasp1=$calificacion->F1;
+                }
+                if(isset($calificacion->P2)){
+                 $periodo2=$calificacion->P2;
+                }
+                if(isset($calificacion->F2)){
+                 $fallasp2=$calificacion->F2;
+                }
+                if(isset($calificacion->P3)){
+                 $periodo3=$calificacion->P3;
+                }
+                if(isset($calificacion->F3)){
+                 $fallasp3=$calificacion->F3;
+                }
+                if(isset($calificacion->P4)){
+                 $periodo4=$calificacion->P4;
+                }
+                if(isset($calificacion->F4)){
+                 $fallasp4=$calificacion->F4;
+                }
+                $defxasi=($periodo1+$periodo2+$periodo3+$periodo4)/4;
+                $def_area+=$defxasi;
+                        }
+                $def_area1=$def_area/$asignaturasc;
+                $definitiva_area=$this->truncateFloat($def_area1, 2);
+                if($definitiva_area<$h->nota_min_a){
+                    $total_areas_na++;
+                }
+                   }
+
+                }
+                $estado="";
+                $grado_sig="";
+                $grado=grado::where('id','=',$curso->id_grado)->first();
+                $curso_c=curso::where('CURSO','=',$estudiante->CURSO)->first();
+                if($total_areas_na!=0){
+                $estado="NO APROBADO";
+                $grado_sig=$estudiante->GRADO;
+                }else{
+                $estado="APROBADO";
+                $grado_sig=$grado->GRADO_SIGUIENTE;         
+                }
+
+                //CIERRE CONSULTA AÑO APROBADO O NO
+
+                $esfin=new estado_final_anual();
+                $esfin->CODIGO=$estudiante->CODIGO;
+                $esfin->PERIODO=$periodo;
+                $esfin->COD_GRADO=$curso->id_grado;
+                
+                $esfin->GRADO=$estudiante->GRADO;
+                $esfin->COD_CURSO=$curso_c->id;
+                $esfin->ESTADO=$estado;
+                $esfin->GRADO_SIGUIENTE=$grado_sig;
+                $esfin->save();
             }
+
+
 
 
             $institucion->ACTIVO=0;
