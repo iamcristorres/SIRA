@@ -397,6 +397,22 @@ class PDF extends baseFpdf{
         $this->cell(165,6,utf8_decode("Nro. de Confirmación: $cod_certifi"),0,"","R");
     }
 
+    public function escalaNacional($calification,$periodo){
+        $h=historial_periodo::where('periodo_anual','=',$periodo)->first();
+        $desempeno="---";
+        if($calification<=$h->bj_max){
+            $desempeno="DESEMPEÑO BAJO"; 
+        }else if($calification>$h->bj_max && $calification <= $h->bs_max){
+            $desempeno="DESEMPEÑO BÁSICO";
+        }else if($calification > $h->bs_max && $calification <= $h->al_max){
+            $desempeno="DESEMPEÑO ALTO";
+        }else if($calification > $h->al_max){
+            $desempeno="DESEMPEÑO SUPERIOR";
+        }
+
+        return $desempeno;
+    }
+
     public function truncateFloat($number, $digitos)
     {
     $raiz = 10;
@@ -483,18 +499,37 @@ class PDF extends baseFpdf{
                 $this->SetFillColor(87,180,252);
                 $this->SetFont('Arial','b',7);       
                 $this->cell(110,4,utf8_decode("ÁREA:: $area->AREA"),1,"","L",1);
-                $this->cell(20,4,utf8_decode(""),1,"","L",1);
-                $this->cell(35,4,utf8_decode(""),1,"","L",1);
-                $this->Ln();
                 $asignaturas=historicoAsignatura::where('ID_AREA','=',$area->ID_AREA)->where('ID_CURSO','=',$estado->COD_CURSO)->get();
                 foreach($asignaturas as $asignatura){
                     $calificacion=historialCalificacion::where('CODIGO_ESTUDIANTE',$estudiante_codigo)->where('PERIODO',$ano_cert)->where('ID_ASIGNATURA',$asignatura->ID_ASIGNATURA)->first();
                     $def_area+=$calificacion->DEF;
                 }
                 $def_area=$def_area/$asignaturasc;
-                
-            }
+
+                // INFORMACION DEL ÁREA
+                $this->SetFont('Arial','b',9);  
+                $this->cell(20,4,$this->truncateFloat($def_area,2),1,"","C",1);
+                $this->SetFont('Arial','b',7);  
+                $this->cell(35,4,utf8_decode(""),1,"","L",1);
+                $this->Ln();
+
+                //INFORMACIÓN DE LA ASIGNATURA
+
+                foreach($asignaturas as $asignatura){
+                    $calificacion=historialCalificacion::where('CODIGO_ESTUDIANTE',$estudiante_codigo)->where('PERIODO',$ano_cert)->where('ID_ASIGNATURA',$asignatura->ID_ASIGNATURA)->first();
+                    $this->SetFillColor(255,255,255);
+                    $this->cell(102,4,utf8_decode("$asignatura->NOMBRE_ASIGNATURA"),1,"","L",1);
+                    $this->cell(8,4,utf8_decode("$asignatura->IHS"),1,"","C",1);
+                    $this->cell(20,4,utf8_decode("$calificacion->DEF"),1,"","C",1);
+                    $this->cell(35,4,utf8_decode($this->escalaNacional($calificacion->DEF,$ano_cert)),1,"","C",1);
+                    $this->Ln();
+                }
+
+
+
+            }   
         }
+
 
 
 

@@ -367,6 +367,7 @@ class institucion_controller extends Controller
             foreach($asignaturas as $asignatura){
                 $historicoAsignatura=new historicoAsignatura();
                 $historicoAsignatura->ID_AREA=$asignatura->id_area;
+                $historicoAsignatura->ID_ASIGNATURA=$asignatura->id;
                 $historicoAsignatura->NOMBRE_ASIGNATURA=$asignatura->NOMBRE_ASIGNATURA;
                 $historicoAsignatura->ID_GRADO=$asignatura->id_grado;
                 $historicoAsignatura->ID_CURSO=$asignatura->id_curso;
